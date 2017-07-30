@@ -1,0 +1,42 @@
+package com.example.jinphy.mvp_sample.data.source.local;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.text.InputType;
+
+/**
+ * Created by jinphy on 2017/7/30.
+ */
+
+public class TasksDBHelper extends SQLiteOpenHelper{
+
+    public static final int DATAbASE_VERSION = 1;
+    private static final String DATABASE_NAME = "Task.db";
+    private static final String TEXT_TYPE = " TEXT";
+    private static final String BOOLEAN_TYPE = " INTEGER";
+    private static final String COMMA_SEP = ",";
+
+    private static final String SQL_CREATE_ENTRIES =
+            "CREATE_TABLE"+ TasksPersistenceContract.TaskEntry.TABLE_NAME +"("+
+                    TasksPersistenceContract.TaskEntry.COLUMN_NAME_ENTRY_ID +TEXT_TYPE+" primary key,"+
+                    TasksPersistenceContract.TaskEntry.COLUMN_NAME_TITLE+TEXT_TYPE+COMMA_SEP+
+                    TasksPersistenceContract.TaskEntry.COLUMN_NAME_DESCRPITION+TEXT_TYPE+COMMA_SEP+
+                    TasksPersistenceContract.TaskEntry.COLUMN_NAME_COMPLETED+BOOLEAN_TYPE+
+                    " )";
+
+    public TasksDBHelper(Context context) {
+        super(context,DATABASE_NAME,null,DATAbASE_VERSION);
+    }
+
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(SQL_CREATE_ENTRIES);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int i, int i1) {
+
+    }
+}
