@@ -12,7 +12,7 @@ import java.util.UUID;
  * Created by jinphy on 2017/7/30.
  */
 
-public class Task {
+public class Task implements Cloneable{
 
     @NonNull private  final String id;
 
@@ -52,7 +52,7 @@ public class Task {
     @NonNull public String getId(){
         return id;
     }
-    @Nullable String getTitle(){
+    @Nullable public String getTitle(){
         return title;
     }
     @Nullable public String getTitleForList(){
@@ -105,6 +105,11 @@ public class Task {
         return "Task with title "+title;
     }
 
+
+    @Override
+    protected Task clone() throws CloneNotSupportedException {
+        return new Task(this.title, this.description, this.id, this.completed);
+    }
 }
 
 
