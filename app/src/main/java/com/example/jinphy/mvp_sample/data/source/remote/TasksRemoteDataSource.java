@@ -2,6 +2,7 @@ package com.example.jinphy.mvp_sample.data.source.remote;
 
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.example.jinphy.mvp_sample.data.Task;
 import com.example.jinphy.mvp_sample.data.source.TasksDataSource;
@@ -22,7 +23,7 @@ public class TasksRemoteDataSource implements TasksDataSource {
     private static TasksRemoteDataSource instance = new TasksRemoteDataSource();
 
     // 服务器延时时间
-    private static final int SERVICE_LATENCY_IN_MILLIS = 5000;
+    private static final int SERVICE_LATENCY_IN_MILLIS = 2000;
 
     // 模拟服务器中的数据
     private static final Map<String, Task> TASKS_SERVICE_DATA;

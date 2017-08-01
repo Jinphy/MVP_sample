@@ -14,13 +14,19 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <color name="colorPrimary">#455A64</color>
-    <color name="colorPrimaryDark">#263238</color>
-    <color name="colorAccent">#D50000</color>
-
-    <drawable name="completedTaskBackground">#CCCCCC</drawable>
-
-    <drawable name="touchFeedback">#CFD8DC</drawable>
-
-</resources>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_filter"
+        android:title="@string/menu_filter"
+        android:icon="@drawable/ic_filter_list"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_clear"
+        android:title="@string/menu_clear"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_refresh"
+        android:title="@string/refresh"
+        app:showAsAction="never" />
+</menu>

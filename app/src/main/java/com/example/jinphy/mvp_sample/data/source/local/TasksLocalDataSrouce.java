@@ -46,7 +46,7 @@ public class TasksLocalDataSrouce implements TasksDataSource{
         String[] projection = {
                 TaskEntry.COLUMN_NAME_ENTRY_ID,
                 TaskEntry.COLUMN_NAME_TITLE,
-                TaskEntry.COLUMN_NAME_DESCRPITION,
+                TaskEntry.COLUMN_NAME_DESCRIPTION,
                 TaskEntry.COLUMN_NAME_COMPLETED
         };
         return projection;
@@ -148,15 +148,16 @@ public class TasksLocalDataSrouce implements TasksDataSource{
     public void completeTask(@NonNull Task task) {
         checkNotNull(task);
 
-        changeComplettionState(task.getId(),true);
+        changeCompleteState(task.getId(),true);
 
     }
 
     @Override
     public void completeTask(@NonNull String taskId) {
-        changeComplettionState(taskId,true);
+        changeCompleteState(taskId,true);
     }
-    private void changeComplettionState(String  taskId,boolean completionState){
+
+    private void changeCompleteState(String  taskId, boolean completionState){
         SQLiteDatabase db =helper.getReadableDatabase();
 
         ContentValues values = new ContentValues();
@@ -172,12 +173,12 @@ public class TasksLocalDataSrouce implements TasksDataSource{
     @Override
     public void activateTask(@NonNull Task task) {
         checkNotNull(task);
-        changeComplettionState(task.getId(),false);
+        changeCompleteState(task.getId(),false);
     }
 
     @Override
     public void activateTask(@NonNull String taskId) {
-        changeComplettionState(taskId,false);
+        changeCompleteState(taskId,false);
     }
 
     @Override

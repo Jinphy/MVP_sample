@@ -2,8 +2,11 @@ package com.example.jinphy.mvp_sample.data.source;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.jinphy.mvp_sample.data.Task;
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -67,6 +70,7 @@ public class TasksRepository implements TasksDataSource{
             return;
         }
         if (cacheIsDirty) {
+            Log.d("Main","load from remote");
             getTasksFromRemoteDataSource(callback);
         }else{
             taskLocalDataSource.getTasks(new LoadTasksCallback() {
@@ -162,7 +166,7 @@ public class TasksRepository implements TasksDataSource{
 
         ensureCachedTasks();
 
-        cachedTasks.put(task.getId(), task);
+        cachedTasks.put(task.getId(), activeTask);
     }
 
     @Override
@@ -230,13 +234,18 @@ public class TasksRepository implements TasksDataSource{
     private void refreshCache(List<Task> tasks) {
         ensureCachedTasks();
         cachedTasks.clear();
-        tasks.forEach(it->cachedTasks.put(it.getId(),it));
+        for (Task task : tasks) {
+            cachedTasks.put(task.getId(), task);
+        }
+//        tasks.forEach(it->cachedTasks.put(it.getId(),it));
         cacheIsDirty = false;
     }
 
     private void refreshLocalDataSource(List<Task> tasks) {
         taskLocalDataSource.deleteAllTasks();
-        tasks.forEach(it-> taskLocalDataSource.saveTask(it));
+        for (Task task : tasks) {
+            taskLocalDataSource.saveTask(task);
+        }
     }
 
     @Nullable

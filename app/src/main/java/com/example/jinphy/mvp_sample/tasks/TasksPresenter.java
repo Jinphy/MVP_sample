@@ -7,13 +7,10 @@ import com.example.jinphy.mvp_sample.data.Task;
 import com.example.jinphy.mvp_sample.data.source.TasksDataSource;
 import com.example.jinphy.mvp_sample.data.source.TasksRepository;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 /**
@@ -169,7 +166,7 @@ public class TasksPresenter implements TasksContract.Presenter {
 
     @Override
     public void completeTask(@NonNull Task completedTask) {
-        checkNotNull(completedTask);
+        checkNotNull(completedTask,"activeTask cannot be null!");
         tasksRepository.completeTask(completedTask);
         tasksView.showTaskMarkedComplete();
         loadTasks(false,false);
