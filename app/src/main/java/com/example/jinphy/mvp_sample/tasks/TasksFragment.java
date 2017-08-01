@@ -214,6 +214,7 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     @Override
     public void showLoadingTasksError() {
         showMessage(getString(R.string.loading_tasks_error));
+        setLoadingIndicator(false);
     }
 
     private void showMessage(String message) {
