@@ -44,13 +44,6 @@ public class TaskDetailFragment extends Fragment implements TaskDetailContract.V
 
 
 
-
-
-
-
-
-
-
     public TaskDetailFragment() {
         // Required empty public constructor
     }
@@ -63,13 +56,7 @@ public class TaskDetailFragment extends Fragment implements TaskDetailContract.V
      */
     public static TaskDetailFragment newInstance(@NonNull String taskId) {
 
-        Bundle args = new Bundle();
-        args.putString(ARGUMENT_TASK_ID,taskId);
-
-        TaskDetailFragment fragment = new TaskDetailFragment();
-        fragment.setArguments(args);
-
-        return fragment;
+        return new TaskDetailFragment();
     }
 
     @Override

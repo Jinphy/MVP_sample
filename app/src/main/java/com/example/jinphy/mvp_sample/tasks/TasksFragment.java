@@ -76,6 +76,11 @@ public class TasksFragment extends Fragment implements TasksContract.View {
     @Override
     public void onResume(){
         super.onResume();
+        if (presenter==null){
+            Intent intent = new Intent(getActivity(), TasksActivity.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
         presenter.start();
     }
 
@@ -114,7 +119,9 @@ public class TasksFragment extends Fragment implements TasksContract.View {
         swipeRefreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(getActivity(),R.color.colorPrimary),
                 ContextCompat.getColor(getActivity(),R.color.colorAccent),
-                ContextCompat.getColor(getActivity(),R.color.colorPrimaryDark)
+                ContextCompat.getColor(getActivity(),R.color.colorPrimaryDark),
+                ContextCompat.getColor(getActivity(),R.color.purple),
+                ContextCompat.getColor(getActivity(),R.color.green)
         );
         // Set the scrolling view in the custom SwipeRefreshLayout
         swipeRefreshLayout.setScrollUpChild(listView);

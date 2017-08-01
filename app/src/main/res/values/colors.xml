@@ -18,6 +18,8 @@
     <color name="colorPrimary">#455A64</color>
     <color name="colorPrimaryDark">#263238</color>
     <color name="colorAccent">#D50000</color>
+    <color name="purple">#809</color>
+    <color name="green">#385</color>
 
     <drawable name="completedTaskBackground">#CCCCCC</drawable>
 
