@@ -113,7 +113,7 @@ public class TaskDetailPresenter implements TaskDetailContract.Presenter {
             return;
         }
         repository.deleteTask(taskId);
-        taskDetailView.showTskDeleted();
+        taskDetailView.showTaskDeleted();
     }
 
     @Override

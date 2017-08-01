@@ -70,7 +70,6 @@ public class TasksRepository implements TasksDataSource{
             return;
         }
         if (cacheIsDirty) {
-            Log.d("Main","load from remote");
             getTasksFromRemoteDataSource(callback);
         }else{
             taskLocalDataSource.getTasks(new LoadTasksCallback() {

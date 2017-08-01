@@ -26,7 +26,7 @@ public interface TaskDetailContract {
 
         void showEditTask(String taskId);
 
-        void showTskDeleted();
+        void showTaskDeleted();
 
         void showTaskMarkedComplete();
 

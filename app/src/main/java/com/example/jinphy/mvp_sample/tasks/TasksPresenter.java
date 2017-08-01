@@ -2,6 +2,7 @@ package com.example.jinphy.mvp_sample.tasks;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.example.jinphy.mvp_sample.data.Task;
 import com.example.jinphy.mvp_sample.data.source.TasksDataSource;

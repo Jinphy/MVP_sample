@@ -63,8 +63,9 @@ public class TasksActivity extends AppCompatActivity {
             );
             // Create the repository
             TasksRepository repository = TasksRepository.getInstance(
-                    TasksLocalDataSrouce.getInstance(this),
-                    TasksRemoteDataSource.getInstance());
+                    TasksRemoteDataSource.getInstance(),
+                    TasksLocalDataSrouce.getInstance(this) );
+
             // Create the presenter
             presenter = new TasksPresenter(repository, tasksFragment);
 
