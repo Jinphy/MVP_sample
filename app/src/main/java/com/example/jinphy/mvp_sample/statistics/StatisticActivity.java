@@ -12,9 +12,11 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.jinphy.mvp_sample.R;
+import com.example.jinphy.mvp_sample.UseCaseHandler;
 import com.example.jinphy.mvp_sample.data.source.TasksRepository;
 import com.example.jinphy.mvp_sample.data.source.local.TasksLocalDataSrouce;
 import com.example.jinphy.mvp_sample.data.source.remote.TasksRemoteDataSource;
+import com.example.jinphy.mvp_sample.domain.usecase.GetStatistic;
 import com.example.jinphy.mvp_sample.util.ActivityUtils;
 
 public class StatisticActivity extends AppCompatActivity {
@@ -63,8 +65,17 @@ public class StatisticActivity extends AppCompatActivity {
                 TasksLocalDataSrouce.getInstance(this)
         );
 
+
+        // Create useCase
+        GetStatistic getStatistic = new GetStatistic(repository);
+        UseCaseHandler useCaseHandler = UseCaseHandler.getInstance();
+
         // Create the presenter
-        new StatisticPresenter(repository, fragment);
+        new StatisticPresenter(
+                fragment,
+                getStatistic,
+                useCaseHandler
+        );
 
 
     }

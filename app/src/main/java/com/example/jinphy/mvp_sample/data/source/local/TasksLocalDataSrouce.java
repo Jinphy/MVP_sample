@@ -5,9 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.example.jinphy.mvp_sample.data.Task;
+import com.example.jinphy.mvp_sample.data.model.Task;
 import com.example.jinphy.mvp_sample.data.source.TasksDataSource;
 import com.example.jinphy.mvp_sample.data.source.local.TasksPersistenceContract.TaskEntry;
 

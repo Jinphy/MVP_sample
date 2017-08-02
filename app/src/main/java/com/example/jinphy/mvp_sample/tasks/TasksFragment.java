@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.PopupMenu;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,7 +24,7 @@ import android.widget.TextView;
 
 import com.example.jinphy.mvp_sample.R;
 import com.example.jinphy.mvp_sample.addedittask.AddEditTaskActivity;
-import com.example.jinphy.mvp_sample.data.Task;
+import com.example.jinphy.mvp_sample.data.model.Task;
 import com.example.jinphy.mvp_sample.taskdetail.TaskDetailActivity;
 
 import java.util.ArrayList;

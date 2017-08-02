@@ -2,16 +2,16 @@ package com.example.jinphy.mvp_sample.tasks;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.example.jinphy.mvp_sample.data.Task;
-import com.example.jinphy.mvp_sample.data.source.TasksDataSource;
-import com.example.jinphy.mvp_sample.data.source.TasksRepository;
+import com.example.jinphy.mvp_sample.UseCase;
+import com.example.jinphy.mvp_sample.UseCaseHandler;
+import com.example.jinphy.mvp_sample.data.model.Task;
+import com.example.jinphy.mvp_sample.domain.usecase.ActivateTask;
+import com.example.jinphy.mvp_sample.domain.usecase.ClearCompletedTasks;
+import com.example.jinphy.mvp_sample.domain.usecase.CompleteTask;
+import com.example.jinphy.mvp_sample.domain.usecase.GetTasks;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import io.reactivex.Observable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 /**
@@ -22,23 +22,41 @@ public class TasksPresenter implements TasksContract.Presenter {
 
     public static final int REQUEST_ADD_TASK = 1;
 
-    private final TasksRepository tasksRepository;
-
     private final TasksContract.View tasksView;
+
+    private final GetTasks getTasks;
+
+    private final CompleteTask completeTask;
+
+    private final ActivateTask activateTask;
+
+    private final ClearCompletedTasks clearCompletedTasks;
+
+
+    private final UseCaseHandler useCaseHandler;
+
 
     private TasksFilterType currentFiltering = TasksFilterType.ALL_TASKS;
 
     private boolean firstLoad = true;
 
+
     public TasksPresenter(
-            @NonNull TasksRepository tasksRepository,
-            @NonNull TasksContract.View tasksView){
-        this.tasksRepository =checkNotNull(tasksRepository,"tasksRepository cannot be null");
-        this.tasksView = checkNotNull(tasksView, "tasksView cannot be null");
+            @NonNull TasksContract.View tasksView,
+            @NonNull GetTasks getTasks,
+            @NonNull CompleteTask completeTask,
+            @NonNull ActivateTask activateTask,
+            @NonNull ClearCompletedTasks clearCompletedTasks,
+            @NonNull UseCaseHandler useCaseHandler ) {
+        this.tasksView = checkNotNull(tasksView,"tasksView cannot be null!");
+        this.getTasks = checkNotNull(getTasks, "getTasks cannot be null!");
+        this.completeTask = checkNotNull(completeTask, "completeTask cannot be null!");
+        this.activateTask = checkNotNull(activateTask, "activateTask cannot be null!");
+        this.clearCompletedTasks = checkNotNull(clearCompletedTasks, "clearCompletedTasks cannot be null");
+        this.useCaseHandler = checkNotNull(useCaseHandler, "useCseHandler cannot be null!");
 
         this.tasksView.setPresenter(this);
     }
-
 
 
 
@@ -65,55 +83,42 @@ public class TasksPresenter implements TasksContract.Presenter {
     @Override
     public void loadTasks(boolean forceUpdate) {
         loadTasks(forceUpdate || firstLoad,true);
+        firstLoad = false;
     }
 
     private void loadTasks(boolean forceUpdate, final boolean showLoadingUI) {
         if (showLoadingUI) {
             tasksView.setLoadingIndicator(true);
         }
-        if (forceUpdate) {
-            // 将数据仓库中的所有缓存数据设置为过期的
-            tasksRepository.refreshTasks();
-        }
 
+        GetTasks.RequestValues requestValues = new GetTasks.RequestValues(currentFiltering,forceUpdate);
 
-        tasksRepository.getTasks(new TasksDataSource.LoadTasksCallback() {
-            @Override
-            public void onTasksLoaded(List<Task> tasks) {
-                List<Task> taskToShow = new ArrayList<>();
+        useCaseHandler.execute(
+                getTasks,
+                requestValues,
+                new UseCase.UseCaseCallback<GetTasks.ResponseValue>() {
+                    @Override
+                    public void onSuccess(GetTasks.ResponseValue response) {
+                        List<Task>tasks = response.getTasks();
+                        if (!tasksView.isActive()) {
+                            return;
+                        }
+                        if (showLoadingUI) {
+                            tasksView.setLoadingIndicator(false);
+                        }
+                        processTasks(tasks);
+                    }
 
-                switch (currentFiltering) {
-                    case ALL_TASKS:
-                        taskToShow.addAll(tasks);
-                        break;
-                    case ACTIVE_TASKS:
-                        Observable.fromIterable(tasks).filter(it->it.isActive()).forEach(taskToShow::add);
-                        break;
-                    case COMPLETED_TASKS:
-                        Observable.fromIterable(tasks).filter(it -> it.isCompleted()).forEach(taskToShow::add);
-                        break;
-                    default:
-                        break;
+                    @Override
+                    public void onError() {
+                        if (tasksView.isActive()) {
+                            tasksView.showLoadingTasksError();
+                        }
+                    }
                 }
+        );
 
-                if (!tasksView.isActive()) {
-                    return;
-                }
-                if (showLoadingUI) {
-                    tasksView.setLoadingIndicator(false);
-                }
-                processTasks(taskToShow);
 
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                if (!tasksView.isActive()) {
-                    return;
-                }
-                tasksView.showLoadingTasksError();
-            }
-        });
     }
 
     private void processTasks(List<Task> tasks) {
@@ -168,24 +173,88 @@ public class TasksPresenter implements TasksContract.Presenter {
     @Override
     public void completeTask(@NonNull Task completedTask) {
         checkNotNull(completedTask,"activeTask cannot be null!");
-        tasksRepository.completeTask(completedTask);
-        tasksView.showTaskMarkedComplete();
-        loadTasks(false,false);
+
+        CompleteTask.RequestValues requestValues =
+                new CompleteTask.RequestValues(completedTask.getId());
+        useCaseHandler.execute(
+                completeTask,
+                requestValues,
+                new UseCase.UseCaseCallback<CompleteTask.ResponseValue>() {
+                    @Override
+                    public void onSuccess(CompleteTask.ResponseValue response) {
+                        if (tasksView.isActive()) {
+                            tasksView.showTaskMarkedComplete();
+                            loadTasks(false,false);
+                        }
+                    }
+
+                    @Override
+                    public void onError() {
+                        if (tasksView.isActive()) {
+                            tasksView.showLoadingTasksError();
+                        }
+                    }
+                }
+        );
     }
 
     @Override
     public void activateTask(@NonNull Task activeTask) {
         checkNotNull(activeTask, "activeTask cannot be null!");
-        tasksRepository.activateTask(activeTask);
-        tasksView.showTaskMarkedActive();
-        loadTasks(false,false);
+
+        ActivateTask.RequestValues requestValues =
+                new ActivateTask.RequestValues(activeTask.getId());
+        useCaseHandler.execute(
+                activateTask,
+                requestValues,
+                new UseCase.UseCaseCallback<ActivateTask.ResponseValue>() {
+                    @Override
+                    public void onSuccess(ActivateTask.ResponseValue response) {
+                        if (tasksView.isActive()) {
+                            tasksView.showTaskMarkedActive();
+                            loadTasks(false,false);
+                        }
+                    }
+
+                    @Override
+                    public void onError() {
+                        if (tasksView.isActive()) {
+                            tasksView.showLoadingTasksError();
+                        }
+                    }
+                }
+        );
+
+
     }
 
     @Override
     public void clearCompletedTasks() {
-        tasksRepository.clearCompletedTasks();
-        tasksView.showCompletedTasksCleared();
-        loadTasks(false,false);
+
+        ClearCompletedTasks.RequestValues requestValues =
+                new ClearCompletedTasks.RequestValues();
+        useCaseHandler.execute(
+                clearCompletedTasks,
+                requestValues,
+                new UseCase.UseCaseCallback<ClearCompletedTasks.ResponseValue>() {
+                    @Override
+                    public void onSuccess(ClearCompletedTasks.ResponseValue response) {
+                        if (tasksView.isActive()) {
+                            tasksView.showCompletedTasksCleared();
+                            loadTasks(false,false);
+                        }
+                    }
+
+                    @Override
+                    public void onError() {
+                        if (tasksView.isActive()) {
+                            tasksView.showLoadingTasksError();
+                        }
+                    }
+                }
+        );
+
+
     }
 
     @Override

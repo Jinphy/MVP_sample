@@ -6,9 +6,14 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
 import com.example.jinphy.mvp_sample.R;
+import com.example.jinphy.mvp_sample.UseCaseHandler;
 import com.example.jinphy.mvp_sample.data.source.TasksRepository;
 import com.example.jinphy.mvp_sample.data.source.local.TasksLocalDataSrouce;
 import com.example.jinphy.mvp_sample.data.source.remote.TasksRemoteDataSource;
+import com.example.jinphy.mvp_sample.domain.usecase.ActivateTask;
+import com.example.jinphy.mvp_sample.domain.usecase.CompleteTask;
+import com.example.jinphy.mvp_sample.domain.usecase.DeleteTask;
+import com.example.jinphy.mvp_sample.domain.usecase.GetTask;
 import com.example.jinphy.mvp_sample.util.ActivityUtils;
 
 public class TaskDetailActivity extends AppCompatActivity {
@@ -42,11 +47,24 @@ public class TaskDetailActivity extends AppCompatActivity {
         TasksRepository repository = TasksRepository.getInstance(
                 TasksRemoteDataSource.getInstance(), TasksLocalDataSrouce.getInstance(this)
         );
+
+        // Create useCases
+        GetTask getTask = new GetTask(repository);
+        CompleteTask completeTask = new CompleteTask(repository);
+        ActivateTask activateTask = new ActivateTask(repository);
+        DeleteTask deleteTask = new DeleteTask(repository);
+        UseCaseHandler handler = UseCaseHandler.getInstance();
+
         // Create the presenter
         TaskDetailPresenter presenter = new TaskDetailPresenter(
                 taskId,
-                repository,
-                fragment );
+                fragment,
+                getTask,
+                completeTask,
+                activateTask,
+                deleteTask,
+                handler
+        );
 
     }
 

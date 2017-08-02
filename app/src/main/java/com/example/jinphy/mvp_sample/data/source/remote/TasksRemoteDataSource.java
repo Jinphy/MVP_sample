@@ -1,10 +1,10 @@
 package com.example.jinphy.mvp_sample.data.source.remote;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.example.jinphy.mvp_sample.data.Task;
+import com.example.jinphy.mvp_sample.data.model.Task;
 import com.example.jinphy.mvp_sample.data.source.TasksDataSource;
 import com.google.common.collect.Lists;
 
@@ -49,7 +49,7 @@ public class TasksRemoteDataSource implements TasksDataSource {
     @Override
     public void getTasks(final @NonNull LoadTasksCallback callback) {
         // Simulate network by delaying the execution
-        Handler handler = new Handler();
+        Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(
                 ()->callback.onTasksLoaded(Lists.newArrayList(TASKS_SERVICE_DATA.values())),
                 SERVICE_LATENCY_IN_MILLIS
@@ -61,7 +61,7 @@ public class TasksRemoteDataSource implements TasksDataSource {
     public void getTask(@NonNull String taskId,final @NonNull GetTaskCallback callback) {
         final Task task = TASKS_SERVICE_DATA.get(taskId);
 
-        Handler handler = new Handler();
+        Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(
                 () -> callback.onTaskLoaded(task),
                 SERVICE_LATENCY_IN_MILLIS

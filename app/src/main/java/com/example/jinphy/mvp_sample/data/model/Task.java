@@ -1,4 +1,4 @@
-package com.example.jinphy.mvp_sample.data;
+package com.example.jinphy.mvp_sample.data.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

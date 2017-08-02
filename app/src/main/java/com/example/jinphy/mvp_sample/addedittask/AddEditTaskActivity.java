@@ -1,19 +1,19 @@
 package com.example.jinphy.mvp_sample.addedittask;
 
-import android.support.annotation.NonNull;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
 import com.example.jinphy.mvp_sample.R;
+import com.example.jinphy.mvp_sample.UseCaseHandler;
 import com.example.jinphy.mvp_sample.data.source.TasksRepository;
 import com.example.jinphy.mvp_sample.data.source.local.TasksLocalDataSrouce;
 import com.example.jinphy.mvp_sample.data.source.remote.TasksRemoteDataSource;
+import com.example.jinphy.mvp_sample.domain.usecase.GetTask;
+import com.example.jinphy.mvp_sample.domain.usecase.SaveTask;
 import com.example.jinphy.mvp_sample.util.ActivityUtils;
-
-import java.security.ProtectionDomain;
 
 public class AddEditTaskActivity extends AppCompatActivity {
 
@@ -51,24 +51,25 @@ public class AddEditTaskActivity extends AppCompatActivity {
             );
         }
 
-        boolean shouldLoadDataFromRepo = true;
-
-        if (savedInstanceState != null) {
-            shouldLoadDataFromRepo = savedInstanceState.getBoolean(SHOULD_LOAD_DATA_FROM_REPO_KEY);
-        }
-
         // Create the TasksRepository
         TasksRepository repository = TasksRepository.getInstance(
                 TasksRemoteDataSource.getInstance(),
                 TasksLocalDataSrouce.getInstance(this)
         );
 
+        // Create useCase
+        GetTask getTask = new GetTask(repository);
+        SaveTask saveTask = new SaveTask(repository);
+        UseCaseHandler useCaseHandler = UseCaseHandler.getInstance();
+
+
         //Create the presenter
         presenter = new AddEditTaskPresenter(
                 taskId,
-                repository,
                 fragment,
-                shouldLoadDataFromRepo
+                getTask,
+                saveTask,
+                useCaseHandler
         );
 
     }
@@ -81,11 +82,6 @@ public class AddEditTaskActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(SHOULD_LOAD_DATA_FROM_REPO_KEY,presenter.isDataMissing());
-        super.onSaveInstanceState(outState);
-    }
 
     @Override
     public boolean onSupportNavigateUp(){

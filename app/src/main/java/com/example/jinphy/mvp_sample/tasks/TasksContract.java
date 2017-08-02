@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.example.jinphy.mvp_sample.BasePresenter;
 import com.example.jinphy.mvp_sample.BaseView;
-import com.example.jinphy.mvp_sample.data.Task;
+import com.example.jinphy.mvp_sample.data.model.Task;
 
 import java.util.List;
 

@@ -1,9 +1,7 @@
 package com.example.jinphy.mvp_sample.tasks;
 
 import android.content.Intent;
-import android.os.Debug;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -11,15 +9,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.example.jinphy.mvp_sample.R;
+import com.example.jinphy.mvp_sample.UseCaseHandler;
 import com.example.jinphy.mvp_sample.data.source.TasksRepository;
 import com.example.jinphy.mvp_sample.data.source.local.TasksLocalDataSrouce;
 import com.example.jinphy.mvp_sample.data.source.remote.TasksRemoteDataSource;
 import com.example.jinphy.mvp_sample.statistics.StatisticActivity;
+import com.example.jinphy.mvp_sample.domain.usecase.ActivateTask;
+import com.example.jinphy.mvp_sample.domain.usecase.ClearCompletedTasks;
+import com.example.jinphy.mvp_sample.domain.usecase.CompleteTask;
+import com.example.jinphy.mvp_sample.domain.usecase.GetTasks;
 import com.example.jinphy.mvp_sample.util.ActivityUtils;
-import com.example.jinphy.mvp_sample.util.inject.BindView;
 
 public class TasksActivity extends AppCompatActivity {
 
@@ -50,34 +51,57 @@ public class TasksActivity extends AppCompatActivity {
             navigationView.setNavigationItemSelectedListener(this::onMenuItemClick);
         }
 
-        // Get the fragment
-        TasksFragment tasksFragment = (TasksFragment)
-                getSupportFragmentManager().findFragmentById(R.id.contentFrame);
-        if (tasksFragment == null) {
-            //Create the fragment,if null
-            tasksFragment = TasksFragment.newInstance();
-            ActivityUtils.addFragmentToActivity(
-                    getSupportFragmentManager(),
-                    tasksFragment,
-                    R.id.contentFrame
-            );
-            // Create the repository
-            TasksRepository repository = TasksRepository.getInstance(
-                    TasksRemoteDataSource.getInstance(),
-                    TasksLocalDataSrouce.getInstance(this) );
-
-            // Create the presenter
-            presenter = new TasksPresenter(repository, tasksFragment);
-
-            // Load previously saved state, if available
-            if (savedInstanceState != null) {
-                TasksFilterType currentFilterType = (TasksFilterType) savedInstanceState
-                        .getSerializable(CURRENT_FILTERING_KEY);
-                presenter.setFiltering(currentFilterType);
-            }
-        }
+        initMVP(savedInstanceState);
 
     }
+
+    private void initMVP(Bundle savedInstanceState){
+        new Thread(()->{
+
+            // Get the fragment
+            TasksFragment tasksFragment = (TasksFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.contentFrame);
+            if (tasksFragment == null) {
+                //Create the fragment,if null
+                tasksFragment = TasksFragment.newInstance();
+                ActivityUtils.addFragmentToActivity(
+                        getSupportFragmentManager(),
+                        tasksFragment,
+                        R.id.contentFrame
+                );
+                // Create the repository
+                TasksRepository repository = TasksRepository.getInstance(
+                        TasksRemoteDataSource.getInstance(),
+                        TasksLocalDataSrouce.getInstance(this) );
+
+                // Create useCases
+                GetTasks getTasks = new GetTasks(repository);
+                CompleteTask completeTask = new CompleteTask(repository);
+                ActivateTask activateTask = new ActivateTask(repository);
+                ClearCompletedTasks clearCompletedTasks = new ClearCompletedTasks(repository);
+                UseCaseHandler useCaseHandler = UseCaseHandler.getInstance();
+
+                // Create the presenter
+                presenter = new TasksPresenter(
+                        tasksFragment,
+                        getTasks,
+                        completeTask,
+                        activateTask,
+                        clearCompletedTasks,
+                        useCaseHandler
+                );
+
+                // Load previously saved state, if available
+                if (savedInstanceState != null) {
+                    TasksFilterType currentFilterType = (TasksFilterType) savedInstanceState
+                            .getSerializable(CURRENT_FILTERING_KEY);
+                    presenter.setFiltering(currentFilterType);
+                }
+            }
+
+        }).start();
+    }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

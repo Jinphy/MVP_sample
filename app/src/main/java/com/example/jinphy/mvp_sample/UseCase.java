@@ -24,7 +24,7 @@ public abstract class UseCase<Q extends UseCase.RequestValues, R extends UseCase
         this.callback = useCaseCallback;
     }
 
-    public UseCaseCallback getCallback() {
+    public UseCaseCallback getUseCaseCallback() {
         return callback;
     }
 

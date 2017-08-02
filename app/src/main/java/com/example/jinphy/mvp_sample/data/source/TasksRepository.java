@@ -2,11 +2,8 @@ package com.example.jinphy.mvp_sample.data.source;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import com.example.jinphy.mvp_sample.data.Task;
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
+import com.example.jinphy.mvp_sample.data.model.Task;
 
 import java.util.ArrayList;
 import java.util.Iterator;

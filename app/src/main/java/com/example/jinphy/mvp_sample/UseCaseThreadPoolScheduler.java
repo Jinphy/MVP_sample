@@ -1,6 +1,7 @@
 package com.example.jinphy.mvp_sample;
 
 import android.os.Handler;
+import android.os.Looper;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -12,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public class UseCaseThreadPoolScheduler implements UseCaseScheduler {
 
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public static final int POOL_SIZE = 2;
 
@@ -25,7 +26,7 @@ public class UseCaseThreadPoolScheduler implements UseCaseScheduler {
     public UseCaseThreadPoolScheduler(){
         executor = new ThreadPoolExecutor(
                 POOL_SIZE, MAX_POOL_SIZE, TIME_OUT, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(POOL_SIZE)
+                new ArrayBlockingQueue<>(POOL_SIZE)
         );
     }
 

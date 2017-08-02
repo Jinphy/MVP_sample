@@ -3,43 +3,51 @@ package com.example.jinphy.mvp_sample.addedittask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.example.jinphy.mvp_sample.data.Task;
-import com.example.jinphy.mvp_sample.data.source.TasksDataSource;
+import com.example.jinphy.mvp_sample.UseCase;
+import com.example.jinphy.mvp_sample.UseCaseHandler;
+import com.example.jinphy.mvp_sample.data.model.Task;
+import com.example.jinphy.mvp_sample.domain.usecase.GetTask;
+import com.example.jinphy.mvp_sample.domain.usecase.SaveTask;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by jinphy on 2017/8/1.
  */
 
-public class AddEditTaskPresenter implements AddEditTaskContract.Presenter ,
-            TasksDataSource.GetTaskCallback{
-
-    @NonNull
-    private final TasksDataSource repository;
+public class AddEditTaskPresenter implements AddEditTaskContract.Presenter {
 
     @NonNull private final AddEditTaskContract.View addTaskView;
 
+    private final GetTask getTask;
+
+    private final SaveTask saveTask;
+
+    private final UseCaseHandler useCaseHandler;
+
+
     @Nullable private final String taskId;
 
-    private boolean isDataMissing;
+
 
     public AddEditTaskPresenter(
-            @Nullable String taskId,
-            @NonNull TasksDataSource repository,
+            @NonNull String taskId,
             @NonNull AddEditTaskContract.View addTaskView,
-            boolean shouldLoadDataFromRepo) {
+            @NonNull GetTask getTask,
+            @NonNull SaveTask saveTask,
+            @NonNull UseCaseHandler useCaseHandler) {
         this.taskId = taskId;
-        this.repository = checkNotNull(repository);
         this.addTaskView = checkNotNull(addTaskView);
-        this.isDataMissing = shouldLoadDataFromRepo;
+        this.getTask = checkNotNull(getTask);
+        this.saveTask = checkNotNull(saveTask);
+        this.useCaseHandler = checkNotNull(useCaseHandler);
 
-        addTaskView.setPresenter(this);
+        this.addTaskView.setPresenter(this);
     }
-
 
 
     @Override
     public void start() {
-        if (!isNewTask() && isDataMissing) {
+        if (!isNewTask()) {
             populateTask();
         }
     }
@@ -58,13 +66,25 @@ public class AddEditTaskPresenter implements AddEditTaskContract.Presenter ,
         if (isNewTask()) {
             throw new RuntimeException("populateTask() was called but task is new.");
         }
-        repository.getTask(taskId,this);
+        GetTask.RequestValues requestValues = new GetTask.RequestValues(taskId);
+        useCaseHandler.execute(
+                getTask,
+                requestValues,
+                new UseCase.UseCaseCallback<GetTask.ResponseValue>() {
+                    @Override
+                    public void onSuccess(GetTask.ResponseValue response) {
+                        Task task = response.getTask();
+                        showTask(task);
+                    }
+
+                    @Override
+                    public void onError() {
+                        showEmptyTaskError();
+                    }
+                }
+        );
     }
 
-    @Override
-    public boolean isDataMissing() {
-        return isDataMissing;
-    }
 
     private boolean isNewTask() {
         return taskId==null;
@@ -75,33 +95,78 @@ public class AddEditTaskPresenter implements AddEditTaskContract.Presenter ,
         if (task.isEmpty()) {
             addTaskView.showEmptyTaskError();
         } else {
-            repository.saveTask(task);
-            addTaskView.showTaskList();
-        }
-    }
+            SaveTask.RequestValues requestValues = new SaveTask.RequestValues(task);
+            useCaseHandler.execute(
+                    saveTask,
+                    requestValues,
+                    new UseCase.UseCaseCallback<SaveTask.ResponseValue>() {
+                        @Override
+                        public void onSuccess(SaveTask.ResponseValue response) {
+                            if (addTaskView.isActive()) {
+                                addTaskView.showTaskList();
+                            }
+                        }
 
-    @Override
-    public void onTaskLoaded(Task task) {
-        if (addTaskView.isActive()) {
-            addTaskView.setTitle(task.getTitle());
-            addTaskView.setDescription(task.getDescription());
+                        @Override
+                        public void onError() {
+                            showSaveError();
+                        }
+                    }
+            );
+
+
         }
-        isDataMissing = false;
     }
 
     private void updateTask(String title, String description) {
         if (isNewTask()) {
             throw new RuntimeException("updateTask() was called but task is new");
         } else {
-            repository.saveTask(new Task(title,description,taskId));
-            addTaskView.showTaskList();
+
+            Task task = new Task(title, description, taskId);
+            SaveTask.RequestValues requestValues = new SaveTask.RequestValues(task);
+            useCaseHandler.execute(
+                    saveTask,
+                    requestValues,
+                    new UseCase.UseCaseCallback<SaveTask.ResponseValue>() {
+                        @Override
+                        public void onSuccess(SaveTask.ResponseValue response) {
+                            if (addTaskView.isActive()) {
+                                addTaskView.showTaskList();
+                            }
+                        }
+
+                        @Override
+                        public void onError() {
+                            showSaveError();
+                        }
+                    }
+            );
         }
     }
 
-    @Override
-    public void onDataNotAvailable() {
+    public void showTask(Task task) {
+        if (addTaskView.isActive()) {
+            addTaskView.setTitle(task.getTitle());
+            addTaskView.setDescription(task.getDescription());
+        }
+    }
+
+    public void showEmptyTaskError(){
         if (addTaskView.isActive()) {
             addTaskView.showEmptyTaskError();
         }
     }
+
+    private void  showSaveError() {
+
+    }
+
+
+
+
+
+
+
+
 }

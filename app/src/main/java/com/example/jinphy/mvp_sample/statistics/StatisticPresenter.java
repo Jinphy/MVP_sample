@@ -1,10 +1,15 @@
 package com.example.jinphy.mvp_sample.statistics;
 
 import android.support.annotation.NonNull;
+import android.widget.StackView;
 
-import com.example.jinphy.mvp_sample.data.Task;
+import com.example.jinphy.mvp_sample.UseCase;
+import com.example.jinphy.mvp_sample.UseCaseHandler;
+import com.example.jinphy.mvp_sample.data.model.Statistic;
+import com.example.jinphy.mvp_sample.data.model.Task;
 import com.example.jinphy.mvp_sample.data.source.TasksDataSource;
 import com.example.jinphy.mvp_sample.data.source.TasksRepository;
+import com.example.jinphy.mvp_sample.domain.usecase.GetStatistic;
 
 import java.util.List;
 
@@ -15,16 +20,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class StatisticPresenter implements StatisticContract.Presenter {
 
-
-    private final TasksRepository repository;
-
     private final StatisticContract.View statisticView;
 
+    private final GetStatistic getStatistic;
+
+    private final UseCaseHandler useCaseHandler;
+
+
     public StatisticPresenter(
-            @NonNull TasksRepository repository,
-            @NonNull StatisticContract.View statisticView) {
-        this.repository = checkNotNull(repository);
+            @NonNull StatisticContract.View statisticView,
+            @NonNull GetStatistic getStatistic,
+            @NonNull UseCaseHandler useCaseHandler) {
         this.statisticView = checkNotNull(statisticView);
+        this.getStatistic = checkNotNull(getStatistic);
+        this.useCaseHandler = checkNotNull(useCaseHandler);
 
         this.statisticView.setPresenter(this);
     }
@@ -40,31 +49,29 @@ public class StatisticPresenter implements StatisticContract.Presenter {
     private void loadStatistics() {
         statisticView.setProgressIndicator(true);
 
-        repository.getTasks(new TasksDataSource.LoadTasksCallback() {
-            @Override
-            public void onTasksLoaded(List<Task> tasks) {
-                int activeTass = 0;
-                int completedTasks =0;
+        useCaseHandler.execute(
+                getStatistic,
+                null,
+                new UseCase.UseCaseCallback<GetStatistic.ResponseValue>() {
+                    @Override
+                    public void onSuccess(GetStatistic.ResponseValue response) {
+                        Statistic statistic = response.getStatistic();
+                        if (statisticView.isActive()) {
+                            statisticView.setProgressIndicator(false);
+                            statisticView.showStatistics(
+                                    statistic.getNumOfActiveTasks(),
+                                    statistic.getNumOfCompletedTasks());
+                        }
+                    }
 
-                for (Task task : tasks) {
-                    if (task.isCompleted()) {
-                        completedTasks++;
-                    } else {
-                        activeTass++;
+                    @Override
+                    public void onError() {
+                        if (statisticView.isActive()) {
+                            statisticView.showLoadingStatisticError();
+                        }
                     }
                 }
-                if (statisticView.isActive()) {
-                    statisticView.setProgressIndicator(false);
-                    statisticView.showStatistics(activeTass,completedTasks);
-                }
-            }
+        );
 
-            @Override
-            public void onDataNotAvailable() {
-                if (statisticView.isActive()) {
-                    statisticView.showLoadingStatisticError();
-                }
-            }
-        });
     }
 }
